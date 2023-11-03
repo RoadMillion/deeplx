@@ -24,7 +24,6 @@ function selectAvailableAPI(): number | null {
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-  const fetch = (await import('node-fetch')).default;
   const requestData = req.body;
 
   // if (!requestData || !requestData.text || !requestData.source_lang || !requestData.target_lang) {
