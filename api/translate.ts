@@ -5,7 +5,6 @@ const DEFAULT_LANGUAGE = "AUTO";
 const REQUEST_ALTERNATIVES = 3;
 
 async function queryAPI(data) {
-  data = data.body;
   console.log(data);
   const response = await fetch(API_URL, {
     headers: {
@@ -89,6 +88,6 @@ function buildRequestBody(data) {
 }
 
 export default (req: VercelRequest, res: VercelResponse) => {
-  const result =  queryAPI(params)
+  const result =  queryAPI(req.json())
   return res.json(result);
 };
