@@ -1,8 +1,8 @@
 {
   "functions": {
     "translate.js": {
-      "memory": 512,
-      "maxDuration": 30
+      "memory": 256,
+      "maxDuration": 10
     }
   }
 }
