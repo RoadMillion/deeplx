@@ -16,6 +16,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   // }
 
   const selectedAPI = API_ENDPOINTS[Math.floor(Math.random() * API_ENDPOINTS.length)];
+  console.log('use: ' + selectedAPI);
 
   try {
     const response = await fetch(selectedAPI, {
