@@ -4,6 +4,7 @@ const REQUEST_ALTERNATIVES = 3;
 
 async function queryAPI(data) {
   data = data.body;
+  console.log(data);
   const response = await fetch(API_URL, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
@@ -14,6 +15,7 @@ async function queryAPI(data) {
 
   if (response.ok) {
     const result = await response.json();
+    console.log(result);
     return {
       id: result.id,
       code: 200,
