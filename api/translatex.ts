@@ -4,7 +4,8 @@ const API_ENDPOINTS = [
   'https://3ct3dpprtd.us.aircode.run/translate',
   'https://kn4ktu55mg.us.aircode.run/translate',
   'https://5wuu6ykrr4.us.aircode.run/translate'
-  'https://lily.ai-chat.tech/api/translate'
+  'https://lily.ai-chat.tech/api/translate',
+  'https://gpt.ai-chat.tech/api/translate'
 ];
 
 export default async (req: VercelRequest, res: VercelResponse) => {
