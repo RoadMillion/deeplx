@@ -9,6 +9,7 @@
   },
   "devDependencies": {
     "vercel": "^32.5.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "@upstash/redis": "latest"
   }
 }
