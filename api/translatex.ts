@@ -31,13 +31,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   // }
 
   const selectedAPIIndex = selectAvailableAPI();
-  conole.log(selectedAPIIndex);
 
   if (selectedAPIIndex === null) {
     return res.status(429).json({ error: 'Rate limit exceeded' });
   }
 
   const selectedAPI = API_ENDPOINTS[selectedAPIIndex];
+  console.log(selectedAPI);
   const now = Date.now();
 
   try {
