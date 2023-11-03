@@ -16,6 +16,8 @@ async function queryAPI(data) {
   if (response.ok) {
     const result = await response.json();
     console.log(result);
+    console.log(result.result.texts);
+        console.log(result.result.texts[0].text);
     return {
       id: result.id,
       code: 200,
