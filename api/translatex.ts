@@ -1,21 +1,22 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { Redis } from '@upstash/redis';
 
+const redis = Redis.fromEnv();
 const API_ENDPOINTS = [
   'https://3ct3dpprtd.us.aircode.run/translate',
   'https://kn4ktu55mg.us.aircode.run/translate',
-  'https://5wuu6ykrr4.us.aircode.run/translate'
+  'https://5wuu6ykrr4.us.aircode.run/translate',
   'https://lily.ai-chat.tech/api/translate',
   'https://gpt.ai-chat.tech/api/translate'
 ];
+const redisKey = 'currentApiIndex';
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   const requestData = req.body;
 
-  // if (!requestData || !requestData.text || !requestData.source_lang || !requestData.target_lang) {
-  //   return res.status(400).json({ error: 'Invalid request data' });
-  // }
+  const currentIndex = await redis.incrby(redisKey, 1);
 
-  const selectedAPI = API_ENDPOINTS[Math.floor(Math.random() * API_ENDPOINTS.length)];
+  const selectedAPI = API_ENDPOINTS[currentIndex % API_ENDPOINTS.length];
   console.log('use: ' + selectedAPI);
 
   try {
@@ -37,5 +38,3 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
-
-
