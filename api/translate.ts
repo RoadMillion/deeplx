@@ -1,3 +1,5 @@
+import { VercelRequest, VercelResponse } from "@vercel/node";
+
 const API_URL = "https://www2.deepl.com/jsonrpc";
 const DEFAULT_LANGUAGE = "AUTO";
 const REQUEST_ALTERNATIVES = 3;
@@ -86,6 +88,7 @@ function buildRequestBody(data) {
   return requestString;
 }
 
-module.exports = async function (params) {
-  return await queryAPI(params);
+export default (req: VercelRequest, res: VercelResponse) => {
+  const res = await queryAPI(params)
+  return res.json(res);
 };
