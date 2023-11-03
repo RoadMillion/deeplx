@@ -1,5 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import fetch from 'node-fetch';
+const fetch = require('node-fetch');
 
 const API_ENDPOINTS = [
   { url: 'https://3ct3dpprtd.us.aircode.run/translate', limit: 2 },  
