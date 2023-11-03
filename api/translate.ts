@@ -89,6 +89,6 @@ function buildRequestBody(data) {
 }
 
 export default (req: VercelRequest, res: VercelResponse) => {
-  const result = await queryAPI(params)
+  const result =  queryAPI(params)
   return res.json(result);
 };
