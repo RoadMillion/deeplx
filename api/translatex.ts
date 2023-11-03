@@ -1,52 +1,56 @@
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import fetch from 'node-fetch';
-import { VercelRequest, VercelResponse } from "@vercel/node";
-// 定义三个 API 的地址和速率限制
-const apiEndpoints = [
+
+const API_ENDPOINTS = [
   { url: 'https://3ct3dpprtd.us.aircode.run/translate', limit: 2 },  
   { url: 'https://kn4ktu55mg.us.aircode.run/translate', limit: 2 },
   { url: 'https://5wuu6ykrr4.us.aircode.run/translate', limit: 2 },
   { url: 'https://lily.ai-chat.tech/api/translate', limit: 2 }
-
 ];
 
-// 记录上次请求的时间戳
-const lastRequestTimestamps = new Array(apiEndpoints.length).fill(0);
+const lastRequestTimestamps: number[] = new Array(API_ENDPOINTS.length).fill(0);
 
-// 函数以 JSON 格式的请求数据作为参数
+const RATE_LIMIT = 1000; // 每秒的速率限制，这里设置为 1000 毫秒
+
+function selectAvailableAPI(): number | null {
+  const now = Date.now();
+
+  for (let i = 0; i < API_ENDPOINTS.length; i++) {
+    if ((now - lastRequestTimestamps[i]) >= RATE_LIMIT) {
+      return i;
+    }
+  }
+
+  return null;
+}
+
 export default async (req: VercelRequest, res: VercelResponse) => {
   const requestData = req.body;
 
-  // 确保请求数据有效
   // if (!requestData || !requestData.text || !requestData.source_lang || !requestData.target_lang) {
   //   return res.status(400).json({ error: 'Invalid request data' });
   // }
 
-  const now = Date.now();
+  const selectedAPIIndex = selectAvailableAPI();
 
-  // 选择可用的 API
-  const availableAPIs = apiEndpoints.filter((api, index) => {
-    return (now - lastRequestTimestamps[index]) >= (1000 / api.limit);
-  });
-
-  if (availableAPIs.length === 0) {
-    // 所有 API 都超过速率限制
+  if (selectedAPIIndex === null) {
     return res.status(429).json({ error: 'Rate limit exceeded' });
   }
 
-  // 随机选择一个可用的 API
-  const selectedAPI = availableAPIs[Math.floor(Math.random() * availableAPIs.length)];
+  const selectedAPI = API_ENDPOINTS[selectedAPIIndex];
+  const now = Date.now();
 
   try {
     const response = await fetch(selectedAPI.url, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(requestData)
+      body: JSON.stringify(requestData),
     });
 
     if (response.ok) {
-      lastRequestTimestamps[apiEndpoints.indexOf(selectedAPI)] = now;
+      lastRequestTimestamps[selectedAPIIndex] = now;
       const responseData = await response.json();
       res.json(responseData);
     } else {
@@ -56,3 +60,4 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
