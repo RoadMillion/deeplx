@@ -1,5 +1,4 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-const fetch = require('node-fetch');
 
 const API_ENDPOINTS = [
   { url: 'https://3ct3dpprtd.us.aircode.run/translate', limit: 2 },  
@@ -25,6 +24,7 @@ function selectAvailableAPI(): number | null {
 }
 
 export default async (req: VercelRequest, res: VercelResponse) => {
+  const fetch = (await import('node-fetch')).default;
   const requestData = req.body;
 
   // if (!requestData || !requestData.text || !requestData.source_lang || !requestData.target_lang) {
