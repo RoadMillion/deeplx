@@ -3,6 +3,7 @@ const DEFAULT_LANGUAGE = "AUTO";
 const REQUEST_ALTERNATIVES = 3;
 
 async function queryAPI(data) {
+  console.log(data);
   const response = await fetch(API_URL, {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
