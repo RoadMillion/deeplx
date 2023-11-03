@@ -1,7 +1,8 @@
 {
   "functions": {
-    "api": {
-      "handler": "translate.js"
+    "translate.js": {
+      "memory": 512,
+      "maxDuration": 30
     }
   }
-} 
+}
