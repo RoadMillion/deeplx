@@ -4,7 +4,7 @@ This is the js implementation of [DeepLX](https://github.com/OwO-Network/DeepLX)
 
 [![Deploy with AirCode](https://aircode.io/aircode-deploy-button.svg)](https://aircode.io/dashboard?owner=ifyour&repo=deeplx-js&branch=main&appname=deeplx)
 
-### Demo
+### Demo emo
 
 ![demo](https://images.mingming.dev/file/748b44724c234f28b18e5.png)
 
