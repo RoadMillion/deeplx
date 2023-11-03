@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-
+import { VercelRequest, VercelResponse } from "@vercel/node";
 // 定义三个 API 的地址和速率限制
 const apiEndpoints = [
   { url: 'https://3ct3dpprtd.us.aircode.run/translate', limit: 2 },  
@@ -13,7 +13,7 @@ const apiEndpoints = [
 const lastRequestTimestamps = new Array(apiEndpoints.length).fill(0);
 
 // 函数以 JSON 格式的请求数据作为参数
-export default async (req, res) => {
+export default async (req: VercelRequest, res: VercelResponse) => {
   const requestData = req.body;
 
   // 确保请求数据有效
