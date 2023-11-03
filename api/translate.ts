@@ -87,7 +87,7 @@ function buildRequestBody(data) {
   return requestString;
 }
 
-export default (req: VercelRequest, res: VercelResponse) => {
+export default async (req: VercelRequest, res: VercelResponse) => {
   const result = await queryAPI(req.body);
   res.json(result);
 };
