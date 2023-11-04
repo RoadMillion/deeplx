@@ -1,11 +1,11 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
-
+console.log(prcess.env);
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
         host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT
+        port: 15748
     }
 });
 const maxRateLimit = 1;
