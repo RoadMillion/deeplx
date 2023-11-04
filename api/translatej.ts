@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Redis } from '@upstash/redis';
-
+const maxRateLimit = 1;
 const redis = Redis.fromEnv();
 const redisKeyPrefix = 'tokenBucket:';
 const API_ENDPOINTS = [
@@ -62,10 +62,10 @@ async function getNextAvailableEndpointIndex() {
 
 async function tryAcquireToken(index) {
   const redisKey = `${redisKeyPrefix}${index}`;
-  const result = await redis.decr(redisKey); // Use Redis DECR to atomically decrement the token count
-  if (result === 0) {
+  const result = await redis.decr(redisKey);
+  if (result < -1 * maxRateLimit) {
     // No tokens available, reset the count and return false
-    // await redis.incr(redisKey);
+    await redis.incr(redisKey);
     return false;
   }
   return true;
