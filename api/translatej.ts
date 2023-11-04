@@ -26,7 +26,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     } else {
       try {
         const selectedAPI = API_ENDPOINTS[currentIndex];
-        console.log('api: ' + selectedAPI);
         const response = await fetch(selectedAPI, {
           method: 'POST',
           headers: {
@@ -36,6 +35,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         });
 
         if (response.ok) {
+            console.log('api: ' + selectedAPI + ' status:'+ response.status);
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
