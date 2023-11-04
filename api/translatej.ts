@@ -51,14 +51,27 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   return res.status(500).json({ error: 'Internal Server Error' });
 };
 
+
 async function getNextAvailableEndpointIndex() {
-  for (let i = 0; i < API_ENDPOINTS.length; i++) {
-    if (await tryAcquireToken(i)) {
-      return i;
+  const indices = Array.from({ length: API_ENDPOINTS.length }, (_, i) => i);
+  shuffleArray(indices); // Randomize the order of indices
+  
+  for (const index of indices) {
+    if (await tryAcquireToken(index)) {
+      return index;
     }
   }
   return -1; // No available endpoints
 }
+
+// Utility function to shuffle an array
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]]; // Swap elements
+  }
+}
+
 
 async function tryAcquireToken(index) {
   const redisKey = `${redisKeyPrefix}${index}`;
