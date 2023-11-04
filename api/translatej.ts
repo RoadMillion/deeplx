@@ -1,15 +1,16 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
-import { Redis } from '@upstash/redis';
+import { createClient } from 'redis';
+
+const redis = createClient({
+    password: process.env.REDIS_PASSWORD,
+    socket: {
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
+    }
+});
 const maxRateLimit = 1;
-const redis = Redis.fromEnv();
 const redisKeyPrefix = 'tokenBucket:';
-const API_ENDPOINTS = [
-  'https://3ct3dpprtd.us.aircode.run/translate',
-  'https://kn4ktu55mg.us.aircode.run/translate',
-  'https://5wuu6ykrr4.us.aircode.run/translate',
-  'https://lily.ai-chat.tech/api/translate',
-  'https://gpt.ai-chat.tech/api/translate'
-];
+const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 
 const MAX_RETRIES = 5;
 
