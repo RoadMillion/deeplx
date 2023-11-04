@@ -18,10 +18,9 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   const requestData = req.body;
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
-    const currentIndex = await getNextAvailableEndpointIndex();
+    let currentIndex = await getNextAvailableEndpointIndex();
     console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
-      console.log('waiting');
       await delay(100 * Math.pow(2, retry));
     } else {
       try {
@@ -35,10 +34,10 @@ export default async (req: VercelRequest, res: VercelResponse) => {
         });
 
         if (response.ok) {
-            console.log('api: ' + selectedAPI + ' status:'+ response.status);
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
+          console.log('api: ' + selectedAPI + ' res:'+ responseData);
           return res.json(responseData);
         }
       } catch (error) {
