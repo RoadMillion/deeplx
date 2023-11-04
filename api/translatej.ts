@@ -10,8 +10,7 @@ const redis = createClient({
         port: parseInt(process.env.REDIS_PORT)
     }
 });
-
-await redis.connect()
+redis.connect()
 
 const MAX_RETRIES = 5;
 
