@@ -37,7 +37,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
-          console.log('api: ' + selectedAPI + ' res:'+ responseData);
+          console.log('api: ' + selectedAPI + ' res:'+ JSON.stringify(responseData));
           return res.json(responseData);
         }
       } catch (error) {
