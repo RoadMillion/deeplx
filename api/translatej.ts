@@ -18,12 +18,15 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     const currentIndex = await getNextAvailableEndpointIndex();
+    console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
       // No available endpoints, retry after a delay
+      console.log('waiting');
       await delay(100 * Math.pow(2, retry));
     } else {
       try {
         const selectedAPI = API_ENDPOINTS[currentIndex];
+        console.log('api: ' + selectedAPI);
         const response = await fetch(selectedAPI, {
           method: 'POST',
           headers: {
@@ -39,6 +42,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           return res.json(responseData);
         }
       } catch (error) {
+        console.error(error);
         // Request failed, retry or release the token based on your error handling logic
         await releaseToken(currentIndex);
       }
