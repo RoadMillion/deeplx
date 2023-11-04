@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
-console.log(prcess.env);
+console.log(process.env);
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
