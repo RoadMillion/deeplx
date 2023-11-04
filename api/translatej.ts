@@ -20,7 +20,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
     const currentIndex = await getNextAvailableEndpointIndex();
     console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
-      // No available endpoints, retry after a delay
       console.log('waiting');
       await delay(100 * Math.pow(2, retry));
     } else {
