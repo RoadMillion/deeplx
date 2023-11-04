@@ -1,16 +1,18 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 console.log(process.env);
+const maxRateLimit = 1;
+const redisKeyPrefix = 'tokenBucket:';
+const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
         host: process.env.REDIS_HOST,
-        port: 15748
+        port: parseInt(process.env.REDIS_PORT)
     }
 });
-const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket:';
-const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
+
+await redis.connect()
 
 const MAX_RETRIES = 5;
 
