@@ -7,6 +7,7 @@ const totalUsageKeyPrefix = 'totalUsage';
 
 const FIEXD_WAIT_MS = 500;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
+console.log(1);
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -15,10 +16,11 @@ const redis = createClient({
     }
 });
 redis.connect()
-
+console.log(11);
 const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
+    console.log(2);
   await delay(FIEXD_WAIT_MS);
   const requestData = req.body;
 
