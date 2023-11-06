@@ -38,10 +38,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           body: JSON.stringify(requestData),
         });
         await redis.incr(totalUsageKeyPrefix);
+          const responseData = await response.json();
+          console.log(JSON.stringify(responseData));
+          console.log(response);
         if (response.ok) {
           // Request successful, release the token
           await releaseToken(currentIndex);
-          const responseData = await response.json();
+          
           if (responseData.code !== 200) {
               const realRes = await callRealApi(requestData);
               console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
@@ -51,6 +54,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           return res.json(responseData);
         }
       } catch (error) {
+           console.error('error');
         console.error(error);
         // Request failed, retry or release the token based on your error handling logic
         await releaseToken(currentIndex);
