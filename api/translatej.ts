@@ -4,7 +4,7 @@ const maxRateLimit = 1;
 const redisKeyPrefix = 'tokenBucket2:';
 const usageKeyPrefix = 'apiUsage';
 
-const FIEXD_WAIT_MS = 300;
+const FIEXD_WAIT_MS = 500;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -19,7 +19,6 @@ const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
-  console.log(1);
   const requestData = req.body;
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
@@ -37,17 +36,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           },
           body: JSON.stringify(requestData),
         });
-        console.log(2);
 
         if (response.ok) {
-              console.log(3);
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
-            console.log(3);
           if (responseData.code !== 200) {
               const realRes = await callRealApi(requestData);
-              console.log('finanlly! use real api: ' + JSON.stringify(realRes));
+              console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
               return res.json(realRes);
           }
           // console.log('api: ' + selectedAPI + ' res:'+ JSON.stringify(responseData));
@@ -116,7 +112,6 @@ async function callRealApi(reqData) {
         };
     const response = await fetch(REAL_API_URL, req);
     const resJson = await response.json();
-    console.log('using final api');
     await redis.incr(usageKeyPrefix);
     return {
         'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
