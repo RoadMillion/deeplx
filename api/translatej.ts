@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket3:';
+const redisKeyPrefix = 'tokenBucket:';
 const usageKeyPrefix = 'apiUsage';
 const totalUsageKeyPrefix = 'totalUsage';
 
