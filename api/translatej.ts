@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
 const redisKeyPrefix = 'tokenBucket:1:';
+const FIEXD_WAIT_MS = 500;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -15,6 +16,8 @@ redis.connect()
 const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
+  await delay(FIEXD_WAIT_MS);
+
   const requestData = req.body;
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
