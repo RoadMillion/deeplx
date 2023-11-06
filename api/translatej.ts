@@ -38,7 +38,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           await releaseToken(currentIndex);
           const responseData = await response.json();
           if (responseData.code !== 200) {
-              const realRes = await callRealApi();
+              const realRes = await callRealApi(requestData);
               console.log('finanlly! use real api: ' + JSON.stringify(realRes));
               return res.json(realRes);
           }
