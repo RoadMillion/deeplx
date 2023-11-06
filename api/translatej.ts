@@ -37,7 +37,12 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
-          console.log('api: ' + selectedAPI + ' res:'+ JSON.stringify(responseData));
+          if (responseData.code !== 200) {
+              const realRes = await callRealApi();
+              console.log('finanlly! use real api: ' + JSON.stringify(realRes));
+              return res.json(realRes);
+          }
+          // console.log('api: ' + selectedAPI + ' res:'+ JSON.stringify(responseData));
           return res.json(responseData);
         }
       } catch (error) {
@@ -82,6 +87,27 @@ async function tryAcquireToken(index) {
     return false;
   }
   return true;
+}
+const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
+
+async function callRealApi(reqData) {
+    const authKey = `DeepL-Auth-Key ${env.process.DEEPL_KEY}`;
+    reqData.text = [reqData.text];
+    const req = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+              'Authorization': authKey
+          },
+          body: JSON.stringify(reqData),
+        };
+    const response = await fetch(REAL_API_URL, req);
+    return {
+        'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
+        'code': 200,
+        'data': response.json().translations[0].text;
+    }
+    
 }
 
 async function releaseToken(index) {
