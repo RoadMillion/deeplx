@@ -95,7 +95,8 @@ async function tryAcquireToken(index) {
 }
 const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
-async function callRealApi(reqData) {
+async function callRealApi(reqDataRaw) {
+    const reqData = JSON.parse(JSON.stringify(reqDataRaw));
     const authKeys = process.env.DEEPL_KEY.split(',');
     const key = authKeys[getRandomInt(authKeys.length)];
     const authKey = `DeepL-Auth-Key ${key}`;
