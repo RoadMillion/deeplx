@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
 const redisKeyPrefix = 'tokenBucket:1:';
-const FIEXD_WAIT_MS = 500;
+const FIEXD_WAIT_MS = 300;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -95,7 +95,7 @@ const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
 async function callRealApi(reqData) {
     const authKeys = process.env.DEEPL_KEY.split(',');
-    const key = authKeys[getRandomInt(keys.length)];
+    const key = authKeys[getRandomInt(authKeys.length)];
     const authKey = `DeepL-Auth-Key ${key}`;
     reqData.text = [reqData.text];
     const req = {
