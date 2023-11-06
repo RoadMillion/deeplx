@@ -26,6 +26,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
+      console.log(22);
     // console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
       await delay(100 * Math.pow(2, retry));
@@ -91,7 +92,9 @@ function shuffleArray(array) {
 
 async function tryAcquireToken(index) {
   const redisKey = `${redisKeyPrefix}${index}`;
+    console.log(2111);
   const result = await redis.decr(redisKey);
+    console.log(2333);
   if (result < -1 * maxRateLimit) {
     // No tokens available, reset the count and return false
     await redis.incr(redisKey);
