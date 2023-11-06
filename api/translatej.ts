@@ -2,6 +2,8 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
 const redisKeyPrefix = 'tokenBucket:1:';
+const usageKeyPrefix = 'apiUsage';
+
 const FIEXD_WAIT_MS = 300;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
@@ -98,6 +100,9 @@ async function callRealApi(reqData) {
     const key = authKeys[getRandomInt(authKeys.length)];
     const authKey = `DeepL-Auth-Key ${key}`;
     reqData.text = [reqData.text];
+    if ('auto' === reqData['source_lang']) {
+        delete reqData['source_lang'];
+    }
     const req = {
           method: 'POST',
           headers: {
@@ -107,10 +112,9 @@ async function callRealApi(reqData) {
           body: JSON.stringify(reqData),
         };
     const response = await fetch(REAL_API_URL, req);
-    console.log(JSON.stringify(reqData));
-    console.log(response);
     const resJson = response.json();
-    console.log('using final api: ' + JSON.stringify(resJson));
+    console.log('using final api');
+    await redis.incr(usageKeyPrefix);
     return {
         'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
         'code': 200,
