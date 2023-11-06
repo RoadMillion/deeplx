@@ -94,7 +94,9 @@ async function tryAcquireToken(index) {
 const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
 async function callRealApi(reqData) {
-    const authKey = `DeepL-Auth-Key ${process.env.DEEPL_KEY}`;
+    const authKeys = process.env.DEEPL_KEY.split(',');
+    const key = authKeys[getRandomInt(keys.length)];
+    const authKey = `DeepL-Auth-Key ${key}`;
     reqData.text = [reqData.text];
     const req = {
           method: 'POST',
@@ -116,6 +118,10 @@ async function callRealApi(reqData) {
     }
     
 }
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
 
 async function releaseToken(index) {
   const redisKey = `${redisKeyPrefix}${index}`;
