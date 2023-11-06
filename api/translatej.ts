@@ -1,8 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket2:';
+const redisKeyPrefix = 'tokenBucket3:';
 const usageKeyPrefix = 'apiUsage';
+const totalUsageKeyPrefix = 'totalUsage';
 
 const FIEXD_WAIT_MS = 500;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
@@ -36,7 +37,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           },
           body: JSON.stringify(requestData),
         });
-
+        await redis.incr(totalUsageKeyPrefix);
         if (response.ok) {
           // Request successful, release the token
           await releaseToken(currentIndex);
