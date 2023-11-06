@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket:';
+const redisKeyPrefix = 'tokenBucket:1:';
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -103,7 +103,7 @@ async function callRealApi(reqData) {
         };
     const response = await fetch(REAL_API_URL, req);
     const resJson = response.json();
-    console.log(resJson);
+    console.log('using final api: ' + JSON.stringify(resJson));
     return {
         'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
         'code': 200,
