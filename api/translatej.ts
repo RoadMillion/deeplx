@@ -19,7 +19,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
-    console.log('currentIndex: ' + currentIndex);
+    // console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
       await delay(100 * Math.pow(2, retry));
     } else {
@@ -102,10 +102,12 @@ async function callRealApi(reqData) {
           body: JSON.stringify(reqData),
         };
     const response = await fetch(REAL_API_URL, req);
+    const resJson = response.json();
+    console.log(resJson);
     return {
         'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
         'code': 200,
-        'data': response.json().translations[0].text;
+        'data': resJson.translations[0].text;
     }
     
 }
