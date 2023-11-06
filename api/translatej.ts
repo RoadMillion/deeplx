@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket:1:';
+const redisKeyPrefix = 'tokenBucket2:';
 const usageKeyPrefix = 'apiUsage';
 
 const FIEXD_WAIT_MS = 300;
@@ -19,7 +19,7 @@ const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
-
+  console.log(1);
   const requestData = req.body;
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
@@ -37,11 +37,14 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           },
           body: JSON.stringify(requestData),
         });
+        console.log(2);
 
         if (response.ok) {
+              console.log(3);
           // Request successful, release the token
           await releaseToken(currentIndex);
           const responseData = await response.json();
+            console.log(3);
           if (responseData.code !== 200) {
               const realRes = await callRealApi(requestData);
               console.log('finanlly! use real api: ' + JSON.stringify(realRes));
@@ -112,7 +115,7 @@ async function callRealApi(reqData) {
           body: JSON.stringify(reqData),
         };
     const response = await fetch(REAL_API_URL, req);
-    const resJson = response.json();
+    const resJson = await response.json();
     console.log('using final api');
     await redis.incr(usageKeyPrefix);
     return {
