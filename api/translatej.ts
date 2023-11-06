@@ -105,6 +105,8 @@ async function callRealApi(reqData) {
           body: JSON.stringify(reqData),
         };
     const response = await fetch(REAL_API_URL, req);
+    console.log(JSON.stringify(reqData));
+    console.log(response);
     const resJson = response.json();
     console.log('using final api: ' + JSON.stringify(resJson));
     return {
