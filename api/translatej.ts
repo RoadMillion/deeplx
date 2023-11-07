@@ -121,7 +121,7 @@ async function callRealApi(reqDataRaw) {
     return {
         'id': Math.floor(Math.random() * 100000 + 100000) * 1000,
         'code': 200,
-        'data': resJson.translations[0].text;
+        'data': resJson.translations[0].text
     }
 }
 function getRandomInt(max) {
@@ -129,11 +129,8 @@ function getRandomInt(max) {
 }
 
 async function lock(key) {
-    console.log('lock');
-    const r = await redis.set(key, 1, {
-      EX: 10,
-      NX: true
-    });
+    console.log(`lock key: ${key}`);
+    const r = await redis.sendCommand(['SET', key, '1', 'NX', 'EX', 10]);
     console.log(`lock type: ${typeof r}, lock result: ${r}`);
     return r;
 }
@@ -145,9 +142,7 @@ async function unlock(key) {
 
 async function markInvalid(key) {
     console.log('v');
-   await redis.set(key, 1, {
-      EX: 5
-    });
+   await redis.set(['SET', key, '1', 'EX', 10]);
 }
 
 async function exist(key) {
