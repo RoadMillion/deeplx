@@ -1,13 +1,12 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
-const maxRateLimit = 1;
-const redisKeyPrefix = 'tokenBucket:';
-const usageKeyPrefix = 'apiUsage';
-const totalUsageKeyPrefix = 'totalUsage';
+const usageKeyPrefix = 'apiUsageV1';
+const totalUsageKeyPrefix = 'totalUsageV1';
+const invalidTempKeyPrefix = 'INVALID:'
+const apiPrefix = 'api:';
 
-const FIEXD_WAIT_MS = 500;
+const FIEXD_WAIT_MS = 300;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
-console.log(1);
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
     socket: {
@@ -16,18 +15,14 @@ const redis = createClient({
     }
 });
 redis.connect()
-console.log(11);
 const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
-    console.log(2);
   await delay(FIEXD_WAIT_MS);
   const requestData = req.body;
 
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
-      console.log(22);
-    // console.log('currentIndex: ' + currentIndex);
     if (currentIndex === -1) {
       await delay(100 * Math.pow(2, retry));
     } else {
@@ -41,26 +36,25 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           body: JSON.stringify(requestData),
         });
         await redis.incr(totalUsageKeyPrefix);
-          const responseData = await response.json();
-          console.log(JSON.stringify(responseData));
-          console.log(response);
+        const responseData = await response.json();
         if (response.ok) {
           // Request successful, release the token
-          await releaseToken(currentIndex);
-          
+          await unlock(`${apiPrefix}${currentIndex}`)
           if (responseData.code !== 200) {
-              const realRes = await callRealApi(requestData);
-              console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
-              return res.json(realRes);
+              await markInvalid(`${invalidTempKeyPrefix}${currentIndex}`);
+              if (retry === 3){
+                  const realRes = await callRealApi(requestData);
+                  console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
+                  return res.json(realRes);    
+              }
           }
-          // console.log('api: ' + selectedAPI + ' res:'+ JSON.stringify(responseData));
           return res.json(responseData);
         }
       } catch (error) {
-           console.error('error');
         console.error(error);
-        // Request failed, retry or release the token based on your error handling logic
-        await releaseToken(currentIndex);
+        if(currentIndex !== -1) {
+            unlock(`${apiPrefix}${currentIndex}`);
+        }
       }
     }
   }
@@ -74,6 +68,9 @@ async function getNextAvailableEndpointIndex() {
   shuffleArray(indices); // Randomize the order of indices
   
   for (const index of indices) {
+    if (!(await isValidKey(`${invalidTempKeyPrefix}${index}`))) {
+        continue;
+    }
     if (await tryAcquireToken(index)) {
       return index;
     }
@@ -91,16 +88,9 @@ function shuffleArray(array) {
 
 
 async function tryAcquireToken(index) {
-  const redisKey = `${redisKeyPrefix}${index}`;
-    console.log(2111);
-  const result = await redis.decr(redisKey);
-    console.log(2333);
-  if (result < -1 * maxRateLimit) {
-    // No tokens available, reset the count and return false
-    await redis.incr(redisKey);
-    return false;
-  }
-  return true;
+  const redisKey = `${apiPrefix}${index}`;
+  const lockResult = await lock(index);
+  return lockResult;
 }
 const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
@@ -129,17 +119,34 @@ async function callRealApi(reqDataRaw) {
         'code': 200,
         'data': resJson.translations[0].text;
     }
-    
 }
 function getRandomInt(max) {
   return Math.floor(Math.random() * Math.floor(max));
 }
 
-
-async function releaseToken(index) {
-  const redisKey = `${redisKeyPrefix}${index}`;
-  await redis.incr(redisKey); // Release the token by incrementing the count
+async function lock(key) {
+    const r = await client.set(key, 1, {
+      EX: 10,
+      NX: true
+    });
+    console.log(`lock type: ${typeof r}, lock result: ${r}`);
+    return r;
 }
+
+async function unlock(key) {
+    return await client.del(key);
+}
+
+async function markInvalid(key) {
+   await client.set(key, 1, {
+      EX: 5
+    });
+}
+
+async function isValidKey(key) {
+    return await client.exists(key);
+}
+
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
