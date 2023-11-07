@@ -125,7 +125,7 @@ function getRandomInt(max) {
 }
 
 async function lock(key) {
-    const r = await client.set(key, 1, {
+    const r = await redis.set(key, 1, {
       EX: 10,
       NX: true
     });
@@ -134,17 +134,17 @@ async function lock(key) {
 }
 
 async function unlock(key) {
-    return await client.del(key);
+    return await redis.del(key);
 }
 
 async function markInvalid(key) {
-   await client.set(key, 1, {
+   await redis.set(key, 1, {
       EX: 5
     });
 }
 
 async function isValidKey(key) {
-    return await client.exists(key);
+    return await redis.exists(key);
 }
 
 
