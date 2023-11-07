@@ -5,7 +5,7 @@ const totalUsageKeyPrefix = 'totalUsageV1';
 const invalidTempKeyPrefix = 'INVALID:';
 const apiPrefix = 'api:';
 
-const FIEXD_WAIT_MS = 300;
+const FIEXD_WAIT_MS = 500;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -24,7 +24,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
-      await delay(100 * Math.pow(2, retry));
+      await delay(200 * Math.pow(2, retry));
     } else {
       try {
         const selectedAPI = API_ENDPOINTS[currentIndex];
@@ -132,16 +132,15 @@ async function lock(key) {
     console.log(`lock key: ${key}`);
     const r = await redis.sendCommand(['SET', key, '1', 'NX', 'EX', '10']);
     console.log(`lock type: ${typeof r}, lock result: ${r}`);
-    return r;
+    return r === 'OK';
 }
 
 async function unlock(key) {
-    console.log('un');
     return await redis.del(key);
 }
 
 async function markInvalid(key) {
-    console.log('v');
+   console.log('v');
    await redis.set(['SET', key, '1', 'EX', '10']);
 }
 
@@ -149,6 +148,7 @@ async function exist(key) {
     console.log('i');
     const r = await redis.exists(key);
     console.log(`exist ${r}, ${typeof r}`);
+    return r > 0;
 }
 
 
