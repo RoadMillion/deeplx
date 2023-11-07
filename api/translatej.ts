@@ -2,7 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const usageKeyPrefix = 'apiUsageV1';
 const totalUsageKeyPrefix = 'totalUsageV1';
-const invalidTempKeyPrefix = 'INVALID:'
+const invalidTempKeyPrefix = 'INVALID:';
 const apiPrefix = 'api:';
 
 const FIEXD_WAIT_MS = 300;
