@@ -20,7 +20,7 @@ const MAX_RETRIES = 5;
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
   const requestData = req.body;
-
+  console.log(1);
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
@@ -68,6 +68,7 @@ async function getNextAvailableEndpointIndex() {
   shuffleArray(indices); // Randomize the order of indices
   
   for (const index of indices) {
+      console.log(2);
     if (!(await isValidKey(`${invalidTempKeyPrefix}${index}`))) {
         continue;
     }
@@ -88,8 +89,10 @@ function shuffleArray(array) {
 
 
 async function tryAcquireToken(index) {
+    console.log('try');
   const redisKey = `${apiPrefix}${index}`;
   const lockResult = await lock(index);
+    console.log('lock result');
   return lockResult;
 }
 const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
@@ -125,6 +128,7 @@ function getRandomInt(max) {
 }
 
 async function lock(key) {
+    console.log('lock');
     const r = await redis.set(key, 1, {
       EX: 10,
       NX: true
@@ -134,16 +138,19 @@ async function lock(key) {
 }
 
 async function unlock(key) {
+    console.log('un');
     return await redis.del(key);
 }
 
 async function markInvalid(key) {
+    console.log('v');
    await redis.set(key, 1, {
       EX: 5
     });
 }
 
 async function isValidKey(key) {
+    console.log('i');
     return await redis.exists(key);
 }
 
