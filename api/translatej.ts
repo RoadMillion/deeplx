@@ -69,7 +69,8 @@ async function getNextAvailableEndpointIndex() {
   
   for (const index of indices) {
       console.log(2);
-    if (!(await isValidKey(`${invalidTempKeyPrefix}${index}`))) {
+    if (await exist(`${invalidTempKeyPrefix}${index}`)) {
+        console.log('exist');
         continue;
     }
     if (await tryAcquireToken(index)) {
@@ -149,7 +150,7 @@ async function markInvalid(key) {
     });
 }
 
-async function isValidKey(key) {
+async function exist(key) {
     console.log('i');
     return await redis.exists(key);
 }
