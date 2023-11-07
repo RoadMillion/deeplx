@@ -92,7 +92,7 @@ function shuffleArray(array) {
 async function tryAcquireToken(index) {
     console.log('try');
   const redisKey = `${apiPrefix}${index}`;
-  const lockResult = await lock(index);
+  const lockResult = await lock(redisKey);
     console.log('lock result');
   return lockResult;
 }
@@ -130,7 +130,7 @@ function getRandomInt(max) {
 
 async function lock(key) {
     console.log(`lock key: ${key}`);
-    const r = await redis.sendCommand(['SET', key, '1', 'NX', 'EX', 10]);
+    const r = await redis.sendCommand(['SET', key, '1', 'NX', 'EX', '10']);
     console.log(`lock type: ${typeof r}, lock result: ${r}`);
     return r;
 }
@@ -142,12 +142,13 @@ async function unlock(key) {
 
 async function markInvalid(key) {
     console.log('v');
-   await redis.set(['SET', key, '1', 'EX', 10]);
+   await redis.set(['SET', key, '1', 'EX', '10']);
 }
 
 async function exist(key) {
     console.log('i');
-    return await redis.exists(key);
+    const r = await redis.exists(key);
+    console.log(`exist ${r}, ${typeof r}`);
 }
 
 
