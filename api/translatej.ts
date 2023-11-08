@@ -2,6 +2,8 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from 'redis';
 const usageKeyPrefix = 'apiUsageV1';
 const totalUsageKeyPrefix = 'totalUsageV1';
+const wordUsageKeyPrefix = 'wordUsage';
+const busyKeyPrefix = 'busyUsage:';
 const invalidTempKeyPrefix = 'INVALID:';
 const apiPrefix = 'api:';
 
@@ -20,7 +22,6 @@ const MAX_RETRIES = 5;
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
   const requestData = req.body;
-  console.log(1);
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
@@ -36,11 +37,13 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           body: JSON.stringify(requestData),
         });
         await redis.incr(totalUsageKeyPrefix);
+        await redis.incr(wordUsageKeyPrefix, requestData.text.length);
         const responseData = await response.json();
         if (response.ok) {
           // Request successful, release the token
           await unlock(`${apiPrefix}${currentIndex}`)
           if (responseData.code !== 200) {
+              await redis.incr(busyKeyPrefix);
               await markInvalid(`${invalidTempKeyPrefix}${currentIndex}`);
               if (retry === 3){
                   const realRes = await callRealApi(requestData);
@@ -68,9 +71,7 @@ async function getNextAvailableEndpointIndex() {
   shuffleArray(indices); // Randomize the order of indices
   
   for (const index of indices) {
-      console.log(2);
     if (await exist(`${invalidTempKeyPrefix}${index}`)) {
-        console.log('exist');
         continue;
     }
     if (await tryAcquireToken(index)) {
@@ -90,10 +91,8 @@ function shuffleArray(array) {
 
 
 async function tryAcquireToken(index) {
-    console.log('try');
   const redisKey = `${apiPrefix}${index}`;
   const lockResult = await lock(redisKey);
-    console.log('lock result');
   return lockResult;
 }
 const REAL_API_URL = 'https://api-free.deepl.com/v2/translate';
@@ -129,9 +128,7 @@ function getRandomInt(max) {
 }
 
 async function lock(key) {
-    console.log(`lock key: ${key}`);
     const r = await redis.sendCommand(['SET', key, '1', 'NX', 'EX', '10']);
-    console.log(`lock type: ${typeof r}, lock result: ${r}`);
     return r === 'OK';
 }
 
@@ -140,14 +137,11 @@ async function unlock(key) {
 }
 
 async function markInvalid(key) {
-   console.log('v');
    await redis.set(['SET', key, '1', 'EX', '10']);
 }
 
 async function exist(key) {
-    console.log('i');
     const r = await redis.exists(key);
-    console.log(`exist ${r}, ${typeof r}`);
     return r > 0;
 }
 
