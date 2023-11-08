@@ -21,6 +21,7 @@ const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
+  await redis.sendCommand(['incr', wordUsageKeyPrefix, requestData.text.length]);
   const requestData = req.body;
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
@@ -36,8 +37,6 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           },
           body: JSON.stringify(requestData),
         });
-        await redis.incr(totalUsageKeyPrefix);
-        await redis.incr(wordUsageKeyPrefix, requestData.text.length);
         const responseData = await response.json();
         if (response.ok) {
           // Request successful, release the token
@@ -48,9 +47,11 @@ export default async (req: VercelRequest, res: VercelResponse) => {
               if (retry === 3){
                   const realRes = await callRealApi(requestData);
                   console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
+                  await redis.incr(totalUsageKeyPrefix);
                   return res.json(realRes);    
               }
           }
+          await redis.incr(totalUsageKeyPrefix);
           return res.json(responseData);
         }
       } catch (error) {
