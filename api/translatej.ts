@@ -21,8 +21,8 @@ const MAX_RETRIES = 5;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
-  await redis.sendCommand(['incr', wordUsageKeyPrefix, requestData.text.length]);
   const requestData = req.body;
+  await redis.sendCommand(['incr', wordUsageKeyPrefix, requestData.text.length]);
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
