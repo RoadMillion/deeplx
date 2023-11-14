@@ -23,6 +23,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
   const requestData = req.body;
   await redis.sendCommand(['incrby', wordUsageKeyPrefix, String(requestData.text.length)]);
+  await redis.incr(totalUsageKeyPrefix);
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
@@ -44,22 +45,21 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           if (responseData.code !== 200) {
               await redis.incr(busyKeyPrefix);
               await markInvalid(`${invalidTempKeyPrefix}${currentIndex}`);
-              if (retry === 3){
+              if (retry === 4) {
                   const realRes = await callRealApi(requestData);
                   console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
-                  await redis.incr(totalUsageKeyPrefix);
                   return res.json(realRes);    
               }
+              continue;
           }
-          await redis.incr(totalUsageKeyPrefix);
           return res.json(responseData);
         }
       } catch (error) {
         console.error(error);
-        if(currentIndex !== -1) {
-            unlock(`${apiPrefix}${currentIndex}`);
-        }
       }
+    }
+    if(currentIndex !== -1) {
+      unlock(`${apiPrefix}${currentIndex}`);
     }
   }
 
@@ -138,7 +138,7 @@ async function unlock(key) {
 }
 
 async function markInvalid(key) {
-   await redis.set(['SET', key, '1', 'EX', '100']);
+   await redis.sendCommand(['SET', key, '1', 'EX', '20']);
 }
 
 async function exist(key) {
