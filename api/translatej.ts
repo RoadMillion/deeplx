@@ -138,7 +138,7 @@ async function unlock(key) {
 }
 
 async function markInvalid(key) {
-   await redis.set(['SET', key, '1', 'EX', '10']);
+   await redis.set(['SET', key, '1', 'EX', '100']);
 }
 
 async function exist(key) {
