@@ -7,7 +7,7 @@ const busyKeyPrefix = 'busyUsage:';
 const invalidTempKeyPrefix = 'INVALID:';
 const apiPrefix = 'api:';
 
-const FIEXD_WAIT_MS = 1000;
+const FIEXD_WAIT_MS = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
