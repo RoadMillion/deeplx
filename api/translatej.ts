@@ -17,7 +17,7 @@ const redis = createClient({
     }
 });
 redis.connect()
-const MAX_RETRIES = 5;
+const MAX_RETRIES = 4;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
@@ -45,7 +45,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
           if (responseData.code !== 200) {
               await redis.incr(busyKeyPrefix);
               await markInvalid(`${invalidTempKeyPrefix}${currentIndex}`);
-              if (retry === 4) {
+              if (retry === 3) {
                   const realRes = await callRealApi(requestData);
                   console.log(`selectedAPI:${selectedAPI} no avaiable now, code: ${responseData.code}! we use real api: ${JSON.stringify(realRes)} finanlly!`);
                   return res.json(realRes);    
