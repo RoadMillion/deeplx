@@ -7,7 +7,7 @@ const busyKeyPrefix = 'busyUsage:';
 const invalidTempKeyPrefix = 'INVALID:';
 const apiPrefix = 'api:';
 
-const FIEXD_WAIT_MS = Math.floor(Math.random() * (800 - 200 + 1)) + 200;
+const FIEXD_WAIT_MS = Math.floor(Math.random() * (300 - 200 + 1)) + 200;
 const API_ENDPOINTS = process.env.API_ENDPOINTS.split(',');
 const redis = createClient({
     password: process.env.REDIS_PASSWORD,
@@ -17,7 +17,7 @@ const redis = createClient({
     }
 });
 redis.connect()
-const MAX_RETRIES = 4;
+const MAX_RETRIES = 3;
 
 export default async (req: VercelRequest, res: VercelResponse) => {
   await delay(FIEXD_WAIT_MS);
@@ -27,7 +27,7 @@ export default async (req: VercelRequest, res: VercelResponse) => {
   for (let retry = 0; retry < MAX_RETRIES; retry++) {
     let currentIndex = await getNextAvailableEndpointIndex();
     if (currentIndex === -1) {
-      await delay(300 * Math.pow(2, retry));
+      await delay(100 * Math.pow(2, retry));
     } else {
       try {
         const selectedAPI = API_ENDPOINTS[currentIndex];
